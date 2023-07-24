@@ -61,14 +61,14 @@ benchmark
 
 # docs
 
-docs/_build/
+docs/_build
 docs/__init__
-docs/ai/
-docs/chat_to_files/
-docs/collect/
-docs/learning/
-docs/main/
-docs/steps/
+docs/ai
+docs/chat_to_files
+docs/collect
+docs/learning
+docs/main
+docs/steps
 
 # poetry
 
