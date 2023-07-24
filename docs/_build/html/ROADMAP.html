@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roadmap &mdash; gpt-engineer 0.0.7 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" type="text/css" />
+      <link rel="stylesheet" href="_static/panels-bootstrap.5fd3999ee7762ccc51105388f4a9d115.css" type="text/css" />
+      <link rel="stylesheet" href="_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api_reference.html" />
+    <link rel="prev" title="Contributing to GPT Engineer" href="CONTRIBUTING.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            gpt-engineer
+          </a>
+              <div class="version">
+                0.0.7
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">USER GUIDES:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTING.html">Contributing to GPT Engineer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Roadmap</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#our-current-focus">Our current focus:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#experimental-research">Experimental research</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#codebase-improvements">Codebase improvements</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#how-you-can-help-out">How you can help out</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">PACKAGE API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">gpt-engineer</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Roadmap</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/ROADMAP.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="roadmap">
+<h1>Roadmap<a class="headerlink" href="#roadmap" title="Permalink to this headline"></a></h1>
+<p>There are three main milestones we believe will greatly increase gpt-engineer’s reliability and capability:</p>
+<ul class="simple">
+<li><p>[x] Continuous evaluation of our progress 🎉</p></li>
+<li><p>[ ] Test code and fix errors with LLMs</p></li>
+<li><p>[ ] Make code generation become small, verifiable steps</p></li>
+</ul>
+<section id="our-current-focus">
+<h2>Our current focus:<a class="headerlink" href="#our-current-focus" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>[x] <strong>Continuous evaluation of progress 🎉</strong></p>
+<ul>
+<li><p>[x] Create a step that asks “did it run/work/perfect” in the end of each run <a class="reference external" href="https://github.com/AntonOsika/gpt-engineer/issues/240">#240</a> 🎉</p></li>
+<li><p>[x] Collect a dataset for gpt engineer to learn from, by storing code generation runs 🎉</p></li>
+<li><p>[ ] Run the benchmark multiple times, and document the results for the different “step configs” <a class="reference external" href="https://github.com/AntonOsika/gpt-engineer/issues/239">#239</a></p></li>
+<li><p>[ ] Improve the default config based on results</p></li>
+</ul>
+</li>
+<li><p>[ ] <strong>Self healing code</strong></p>
+<ul>
+<li><p>[ ] Run the generated tests</p></li>
+<li><p>[ ] Feed the results of failing tests back into LLM and ask it to fix the code</p></li>
+</ul>
+</li>
+<li><p>[ ] <strong>Let human give feedback</strong></p>
+<ul>
+<li><p>[ ] Ask human for what is not working as expected in a loop, and feed it into LLM to fix the code, until the human is happy</p></li>
+</ul>
+</li>
+<li><p>[ ] <strong>Improve existing projects</strong></p>
+<ul>
+<li><p>[ ] Decide on the “flow” for the CLI commands and where the project files are created</p></li>
+<li><p>[ ] Add an “improve code” command</p></li>
+<li><p>[ ] Architect how gpt-engineer becomes a platform</p></li>
+<li><p>[ ] Integrate Aider</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="experimental-research">
+<h2>Experimental research<a class="headerlink" href="#experimental-research" title="Permalink to this headline"></a></h2>
+<p>This is not our current focus, but if you are interested in experimenting: Please
+create a thread in Discord #general and share your intentions and your findings as you
+go along. High impact examples:</p>
+<ul class="simple">
+<li><p>[ ] <strong>Make code generation become small, verifiable steps</strong></p>
+<ul>
+<li><p>[ ] Ask GPT4 to decide how to sequence the entire generation, and do one
+prompt for each subcomponent</p></li>
+<li><p>[ ] For each small part, generate tests for that subpart, and do the loop of running the tests for each part, feeding
+results into GPT4, and let it edit the code until they pass</p></li>
+</ul>
+</li>
+<li><p>[ ] <strong>Ad hoc experiments</strong></p>
+<ul>
+<li><p>[ ] Try Microsoft guidance, and benchmark if this helps improve performance</p></li>
+<li><p>[ ] Dynamic planning: Let gpt-engineer plan which “steps” to carry out itself, depending on the
+task, by giving it few shot example of what are usually “the right-sized steps” to carry
+out for such projects</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="codebase-improvements">
+<h2>Codebase improvements<a class="headerlink" href="#codebase-improvements" title="Permalink to this headline"></a></h2>
+<p>By improving the codebase and developer ergonomics, we accelerate progress. Some examples:</p>
+<ul class="simple">
+<li><p>[ ] Set up automatic PR review for all PRs with e.g. Codium pr-agent</p></li>
+<li><p>[ ] LLM tests in CI: Run super small tests with GPT3.5 in CI, that check that simple code generation still works</p></li>
+</ul>
+</section>
+</section>
+<section id="how-you-can-help-out">
+<h1>How you can help out<a class="headerlink" href="#how-you-can-help-out" title="Permalink to this headline"></a></h1>
+<p>You can:</p>
+<ul class="simple">
+<li><p>Post a “design” as a google doc in our Discord and ask for feedback to address one of the items in the roadmap</p></li>
+<li><p>Submit PRs to address one of the items in the roadmap</p></li>
+<li><p>Do a review of someone else’s PR and propose next steps (further review, merge, close)</p></li>
+</ul>
+<p>Volunteer work in any of these will get acknowledged.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="CONTRIBUTING.html" class="btn btn-neutral float-left" title="Contributing to GPT Engineer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api_reference.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023 Anton Osika.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

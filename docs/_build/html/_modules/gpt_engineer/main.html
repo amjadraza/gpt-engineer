@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpt_engineer.main &mdash; gpt-engineer 0.0.7 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/autodoc_pydantic.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/panels-bootstrap.5fd3999ee7762ccc51105388f4a9d115.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            gpt-engineer
+          </a>
+              <div class="version">
+                0.0.7
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">USER GUIDES:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../CONTRIBUTING.html">Contributing to GPT Engineer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ROADMAP.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ROADMAP.html#how-you-can-help-out">How you can help out</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">PACKAGE API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">gpt-engineer</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpt_engineer.main</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpt_engineer.main</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">typer</span>
+
+<span class="kn">from</span> <span class="nn">gpt_engineer.ai</span> <span class="kn">import</span> <span class="n">AI</span><span class="p">,</span> <span class="n">fallback_model</span>
+<span class="kn">from</span> <span class="nn">gpt_engineer.collect</span> <span class="kn">import</span> <span class="n">collect_learnings</span>
+<span class="kn">from</span> <span class="nn">gpt_engineer.db</span> <span class="kn">import</span> <span class="n">DB</span><span class="p">,</span> <span class="n">DBs</span><span class="p">,</span> <span class="n">archive</span>
+<span class="kn">from</span> <span class="nn">gpt_engineer.learning</span> <span class="kn">import</span> <span class="n">collect_consent</span>
+<span class="kn">from</span> <span class="nn">gpt_engineer.steps</span> <span class="kn">import</span> <span class="n">STEPS</span><span class="p">,</span> <span class="n">Config</span> <span class="k">as</span> <span class="n">StepsConfig</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">typer</span><span class="o">.</span><span class="n">Typer</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../main/gpt_engineer.main.main.html#gpt_engineer.main.main">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
+    <span class="n">project_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">typer</span><span class="o">.</span><span class="n">Argument</span><span class="p">(</span><span class="s2">&quot;projects/example&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;path&quot;</span><span class="p">),</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">typer</span><span class="o">.</span><span class="n">Argument</span><span class="p">(</span><span class="s2">&quot;gpt-4&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;model id string&quot;</span><span class="p">),</span>
+    <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">steps_config</span><span class="p">:</span> <span class="n">StepsConfig</span> <span class="o">=</span> <span class="n">typer</span><span class="o">.</span><span class="n">Option</span><span class="p">(</span>
+        <span class="n">StepsConfig</span><span class="o">.</span><span class="n">DEFAULT</span><span class="p">,</span> <span class="s2">&quot;--steps&quot;</span><span class="p">,</span> <span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;decide which steps to run&quot;</span>
+    <span class="p">),</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">typer</span><span class="o">.</span><span class="n">Option</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;--verbose&quot;</span><span class="p">,</span> <span class="s2">&quot;-v&quot;</span><span class="p">),</span>
+<span class="p">):</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="n">verbose</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">fallback_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">ai</span> <span class="o">=</span> <span class="n">AI</span><span class="p">(</span>
+        <span class="n">model_name</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">input_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_path</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+    <span class="n">memory_path</span> <span class="o">=</span> <span class="n">input_path</span> <span class="o">/</span> <span class="s2">&quot;memory&quot;</span>
+    <span class="n">workspace_path</span> <span class="o">=</span> <span class="n">input_path</span> <span class="o">/</span> <span class="s2">&quot;workspace&quot;</span>
+    <span class="n">archive_path</span> <span class="o">=</span> <span class="n">input_path</span> <span class="o">/</span> <span class="s2">&quot;archive&quot;</span>
+
+    <span class="n">dbs</span> <span class="o">=</span> <span class="n">DBs</span><span class="p">(</span>
+        <span class="n">memory</span><span class="o">=</span><span class="n">DB</span><span class="p">(</span><span class="n">memory_path</span><span class="p">),</span>
+        <span class="n">logs</span><span class="o">=</span><span class="n">DB</span><span class="p">(</span><span class="n">memory_path</span> <span class="o">/</span> <span class="s2">&quot;logs&quot;</span><span class="p">),</span>
+        <span class="nb">input</span><span class="o">=</span><span class="n">DB</span><span class="p">(</span><span class="n">input_path</span><span class="p">),</span>
+        <span class="n">workspace</span><span class="o">=</span><span class="n">DB</span><span class="p">(</span><span class="n">workspace_path</span><span class="p">),</span>
+        <span class="n">preprompts</span><span class="o">=</span><span class="n">DB</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;preprompts&quot;</span><span class="p">),</span>
+        <span class="n">archive</span><span class="o">=</span><span class="n">DB</span><span class="p">(</span><span class="n">archive_path</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">steps_config</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="n">StepsConfig</span><span class="o">.</span><span class="n">EXECUTE_ONLY</span><span class="p">,</span>
+        <span class="n">StepsConfig</span><span class="o">.</span><span class="n">USE_FEEDBACK</span><span class="p">,</span>
+        <span class="n">StepsConfig</span><span class="o">.</span><span class="n">EVALUATE</span><span class="p">,</span>
+    <span class="p">]:</span>
+        <span class="n">archive</span><span class="p">(</span><span class="n">dbs</span><span class="p">)</span>
+
+    <span class="n">steps</span> <span class="o">=</span> <span class="n">STEPS</span><span class="p">[</span><span class="n">steps_config</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
+        <span class="n">messages</span> <span class="o">=</span> <span class="n">step</span><span class="p">(</span><span class="n">ai</span><span class="p">,</span> <span class="n">dbs</span><span class="p">)</span>
+        <span class="n">dbs</span><span class="o">.</span><span class="n">logs</span><span class="p">[</span><span class="n">step</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">AI</span><span class="o">.</span><span class="n">serialize_messages</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">collect_consent</span><span class="p">():</span>
+        <span class="n">collect_learnings</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">dbs</span><span class="p">)</span>
+
+    <span class="n">dbs</span><span class="o">.</span><span class="n">logs</span><span class="p">[</span><span class="s2">&quot;token_usage&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">format_token_usage_log</span><span class="p">()</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023 Anton Osika.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

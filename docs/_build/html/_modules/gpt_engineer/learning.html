@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpt_engineer.learning &mdash; gpt-engineer 0.0.7 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/autodoc_pydantic.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/panels-bootstrap.5fd3999ee7762ccc51105388f4a9d115.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            gpt-engineer
+          </a>
+              <div class="version">
+                0.0.7
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">USER GUIDES:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../CONTRIBUTING.html">Contributing to GPT Engineer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ROADMAP.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ROADMAP.html#how-you-can-help-out">How you can help out</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">PACKAGE API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">gpt-engineer</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpt_engineer.learning</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpt_engineer.learning</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">dataclasses_json</span> <span class="kn">import</span> <span class="n">dataclass_json</span>
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+
+<span class="kn">from</span> <span class="nn">gpt_engineer.db</span> <span class="kn">import</span> <span class="n">DB</span><span class="p">,</span> <span class="n">DBs</span>
+<span class="kn">from</span> <span class="nn">gpt_engineer.domain</span> <span class="kn">import</span> <span class="n">Step</span>
+
+
+<span class="nd">@dataclass_json</span>
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Review</span><span class="p">:</span>
+    <span class="n">ran</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
+    <span class="n">perfect</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
+    <span class="n">works</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
+    <span class="n">comments</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">raw</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="nd">@dataclass_json</span>
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Learning</span><span class="p">:</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">steps</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">steps_file_hash</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">logs</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">workspace</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">feedback</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">session</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">review</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Review</span><span class="p">]</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">())</span>
+    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0.3&quot;</span>
+
+
+<span class="n">TERM_CHOICES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">colored</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">)</span>
+    <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
+    <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">)</span>
+    <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
+    <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="s2">&quot;u&quot;</span><span class="p">,</span> <span class="s2">&quot;yellow&quot;</span><span class="p">)</span>
+    <span class="o">+</span> <span class="s2">&quot;(ncertain): &quot;</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="human_input"><a class="viewcode-back" href="../../learning/gpt_engineer.learning.human_input.html#gpt_engineer.learning.human_input">[docs]</a><span class="k">def</span> <span class="nf">human_input</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Review</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="n">colored</span><span class="p">(</span><span class="s2">&quot;To help gpt-engineer learn, please answer 3 questions:&quot;</span><span class="p">,</span> <span class="s2">&quot;light_green&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+
+    <span class="n">ran</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Did the generated code run at all? &quot;</span> <span class="o">+</span> <span class="n">TERM_CHOICES</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">ran</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="s2">&quot;u&quot;</span><span class="p">):</span>
+        <span class="n">ran</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Invalid input. Please enter y, n, or u: &quot;</span><span class="p">)</span>
+
+    <span class="n">perfect</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">useful</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">ran</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
+        <span class="n">perfect</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span>
+            <span class="s2">&quot;Did the generated code do everything you wanted? &quot;</span> <span class="o">+</span> <span class="n">TERM_CHOICES</span>
+        <span class="p">)</span>
+        <span class="k">while</span> <span class="n">perfect</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="s2">&quot;u&quot;</span><span class="p">):</span>
+            <span class="n">perfect</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Invalid input. Please enter y, n, or u: &quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">perfect</span> <span class="o">!=</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
+            <span class="n">useful</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Did the generated code do anything useful? &quot;</span> <span class="o">+</span> <span class="n">TERM_CHOICES</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">useful</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="s2">&quot;u&quot;</span><span class="p">):</span>
+                <span class="n">useful</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Invalid input. Please enter y, n, or u: &quot;</span><span class="p">)</span>
+
+    <span class="n">comments</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">perfect</span> <span class="o">!=</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
+        <span class="n">comments</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span>
+            <span class="s2">&quot;If you have time, please explain what was not working &quot;</span>
+            <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="s2">&quot;(ok to leave blank)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;light_green&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">check_consent</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">Review</span><span class="p">(</span>
+        <span class="n">raw</span><span class="o">=</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">ran</span><span class="p">,</span> <span class="n">perfect</span><span class="p">,</span> <span class="n">useful</span><span class="p">]),</span>
+        <span class="n">ran</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;u&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}[</span><span class="n">ran</span><span class="p">],</span>
+        <span class="n">works</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;u&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}[</span><span class="n">useful</span><span class="p">],</span>
+        <span class="n">perfect</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;u&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}[</span><span class="n">perfect</span><span class="p">],</span>
+        <span class="n">comments</span><span class="o">=</span><span class="n">comments</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="check_consent"><a class="viewcode-back" href="../../learning/gpt_engineer.learning.check_consent.html#gpt_engineer.learning.check_consent">[docs]</a><span class="k">def</span> <span class="nf">check_consent</span><span class="p">():</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.gpte_consent&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">answer</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Is it ok if we store your prompts to learn? (y/n)&quot;</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">answer</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">):</span>
+        <span class="n">answer</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Invalid input. Please enter y or n: &quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">answer</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;true&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Thank you️&quot;</span><span class="p">,</span> <span class="s2">&quot;light_green&quot;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;(If you change your mind, delete the file .gpte_consent)&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;We understand ❤️&quot;</span><span class="p">,</span> <span class="s2">&quot;light_green&quot;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="collect_consent"><a class="viewcode-back" href="../../learning/gpt_engineer.learning.collect_consent.html#gpt_engineer.learning.collect_consent">[docs]</a><span class="k">def</span> <span class="nf">collect_consent</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="n">opt_out</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;COLLECT_LEARNINGS_OPT_OUT&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
+    <span class="n">consent_flag</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.gpte_consent&quot;</span><span class="p">)</span>
+    <span class="n">has_given_consent</span> <span class="o">=</span> <span class="n">consent_flag</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="n">consent_flag</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
+
+    <span class="k">if</span> <span class="n">opt_out</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">has_given_consent</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ask_if_can_store</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">has_given_consent</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">ask_if_can_store</span><span class="p">():</span>
+        <span class="n">consent_flag</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;true&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;(If you change your mind, delete the file .gpte_consent)&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="ask_if_can_store"><a class="viewcode-back" href="../../learning/gpt_engineer.learning.ask_if_can_store.html#gpt_engineer.learning.ask_if_can_store">[docs]</a><span class="k">def</span> <span class="nf">ask_if_can_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="n">can_store</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span>
+        <span class="s2">&quot;Have you understood and agree to that &quot;</span>
+        <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="s2">&quot;OpenAI &quot;</span><span class="p">,</span> <span class="s2">&quot;light_green&quot;</span><span class="p">)</span>
+        <span class="o">+</span> <span class="s2">&quot;and &quot;</span>
+        <span class="o">+</span> <span class="n">colored</span><span class="p">(</span><span class="s2">&quot;gpt-engineer &quot;</span><span class="p">,</span> <span class="s2">&quot;light_green&quot;</span><span class="p">)</span>
+        <span class="o">+</span> <span class="s2">&quot;store anonymous learnings about how gpt-engineer is used &quot;</span>
+        <span class="o">+</span> <span class="s2">&quot;(with the sole purpose of improving it)?</span><span class="se">\n</span><span class="s2">(y/n)&quot;</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">while</span> <span class="n">can_store</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">):</span>
+        <span class="n">can_store</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Invalid input. Please enter y or n: &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">can_store</span> <span class="o">==</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Ok we understand&quot;</span><span class="p">,</span> <span class="s2">&quot;light_green&quot;</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">can_store</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span></div>
+
+
+<div class="viewcode-block" id="logs_to_string"><a class="viewcode-back" href="../../learning/gpt_engineer.learning.logs_to_string.html#gpt_engineer.learning.logs_to_string">[docs]</a><span class="k">def</span> <span class="nf">logs_to_string</span><span class="p">(</span><span class="n">steps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Step</span><span class="p">],</span> <span class="n">logs</span><span class="p">:</span> <span class="n">DB</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
+        <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;--- </span><span class="si">{</span><span class="n">step</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> ---</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">logs</span><span class="p">[</span><span class="n">step</span><span class="o">.</span><span class="vm">__name__</span><span class="p">])</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="extract_learning"><a class="viewcode-back" href="../../learning/gpt_engineer.learning.extract_learning.html#gpt_engineer.learning.extract_learning">[docs]</a><span class="k">def</span> <span class="nf">extract_learning</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">steps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Step</span><span class="p">],</span> <span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">,</span> <span class="n">steps_file_hash</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Learning</span><span class="p">:</span>
+    <span class="n">review</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s2">&quot;review&quot;</span> <span class="ow">in</span> <span class="n">dbs</span><span class="o">.</span><span class="n">memory</span><span class="p">:</span>
+        <span class="n">review</span> <span class="o">=</span> <span class="n">Review</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">dbs</span><span class="o">.</span><span class="n">memory</span><span class="p">[</span><span class="s2">&quot;review&quot;</span><span class="p">])</span>  <span class="c1"># type: ignore</span>
+    <span class="n">learning</span> <span class="o">=</span> <span class="n">Learning</span><span class="p">(</span>
+        <span class="n">prompt</span><span class="o">=</span><span class="n">dbs</span><span class="o">.</span><span class="n">input</span><span class="p">[</span><span class="s2">&quot;prompt&quot;</span><span class="p">],</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+        <span class="n">steps</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([</span><span class="n">step</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">]),</span>
+        <span class="n">steps_file_hash</span><span class="o">=</span><span class="n">steps_file_hash</span><span class="p">,</span>
+        <span class="n">feedback</span><span class="o">=</span><span class="n">dbs</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;feedback&quot;</span><span class="p">),</span>
+        <span class="n">session</span><span class="o">=</span><span class="n">get_session</span><span class="p">(),</span>
+        <span class="n">logs</span><span class="o">=</span><span class="n">logs_to_string</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">dbs</span><span class="o">.</span><span class="n">logs</span><span class="p">),</span>
+        <span class="n">workspace</span><span class="o">=</span><span class="n">dbs</span><span class="o">.</span><span class="n">workspace</span><span class="p">[</span><span class="s2">&quot;all_output.txt&quot;</span><span class="p">],</span>
+        <span class="n">review</span><span class="o">=</span><span class="n">review</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">learning</span></div>
+
+
+<div class="viewcode-block" id="get_session"><a class="viewcode-back" href="../../learning/gpt_engineer.learning.get_session.html#gpt_engineer.learning.get_session">[docs]</a><span class="k">def</span> <span class="nf">get_session</span><span class="p">():</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">())</span> <span class="o">/</span> <span class="s2">&quot;gpt_engineer_user_id.txt&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">user_id</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># random uuid:</span>
+            <span class="n">user_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span><span class="p">))</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">user_id</span>
+    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;ephemeral_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023 Anton Osika.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

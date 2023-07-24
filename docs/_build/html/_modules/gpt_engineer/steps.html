@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpt_engineer.steps &mdash; gpt-engineer 0.0.7 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/autodoc_pydantic.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/panels-bootstrap.5fd3999ee7762ccc51105388f4a9d115.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            gpt-engineer
+          </a>
+              <div class="version">
+                0.0.7
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">USER GUIDES:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../CONTRIBUTING.html">Contributing to GPT Engineer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ROADMAP.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ROADMAP.html#how-you-can-help-out">How you can help out</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">PACKAGE API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">gpt-engineer</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpt_engineer.steps</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpt_engineer.steps</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span> <span class="nn">langchain.schema</span> <span class="kn">import</span> <span class="n">AIMessage</span><span class="p">,</span> <span class="n">HumanMessage</span><span class="p">,</span> <span class="n">SystemMessage</span>
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="kn">import</span> <span class="n">colored</span>
+
+<span class="kn">from</span> <span class="nn">gpt_engineer.ai</span> <span class="kn">import</span> <span class="n">AI</span>
+<span class="kn">from</span> <span class="nn">gpt_engineer.chat_to_files</span> <span class="kn">import</span> <span class="n">to_files</span>
+<span class="kn">from</span> <span class="nn">gpt_engineer.db</span> <span class="kn">import</span> <span class="n">DBs</span>
+<span class="kn">from</span> <span class="nn">gpt_engineer.learning</span> <span class="kn">import</span> <span class="n">human_input</span>
+
+<span class="n">Message</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">AIMessage</span><span class="p">,</span> <span class="n">HumanMessage</span><span class="p">,</span> <span class="n">SystemMessage</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="setup_sys_prompt"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.setup_sys_prompt.html#gpt_engineer.steps.setup_sys_prompt">[docs]</a><span class="k">def</span> <span class="nf">setup_sys_prompt</span><span class="p">(</span><span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">dbs</span><span class="o">.</span><span class="n">preprompts</span><span class="p">[</span><span class="s2">&quot;generate&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Useful to know:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">dbs</span><span class="o">.</span><span class="n">preprompts</span><span class="p">[</span><span class="s2">&quot;philosophy&quot;</span><span class="p">]</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_prompt"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.get_prompt.html#gpt_engineer.steps.get_prompt">[docs]</a><span class="k">def</span> <span class="nf">get_prompt</span><span class="p">(</span><span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;While we migrate we have this fallback getter&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="s2">&quot;prompt&quot;</span> <span class="ow">in</span> <span class="n">dbs</span><span class="o">.</span><span class="n">input</span> <span class="ow">or</span> <span class="s2">&quot;main_prompt&quot;</span> <span class="ow">in</span> <span class="n">dbs</span><span class="o">.</span><span class="n">input</span>
+    <span class="p">),</span> <span class="s2">&quot;Please put your prompt in the file `prompt` in the project directory&quot;</span>
+
+    <span class="k">if</span> <span class="s2">&quot;prompt&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dbs</span><span class="o">.</span><span class="n">input</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="n">colored</span><span class="p">(</span><span class="s2">&quot;Please put the prompt in the file `prompt`, not `main_prompt&quot;</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">dbs</span><span class="o">.</span><span class="n">input</span><span class="p">[</span><span class="s2">&quot;main_prompt&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">dbs</span><span class="o">.</span><span class="n">input</span><span class="p">[</span><span class="s2">&quot;prompt&quot;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="curr_fn"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.curr_fn.html#gpt_engineer.steps.curr_fn">[docs]</a><span class="k">def</span> <span class="nf">curr_fn</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the name of the current function&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">function</span></div>
+
+
+<span class="c1"># All steps below have the signature Step</span>
+
+
+<div class="viewcode-block" id="simple_gen"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.simple_gen.html#gpt_engineer.steps.simple_gen">[docs]</a><span class="k">def</span> <span class="nf">simple_gen</span><span class="p">(</span><span class="n">ai</span><span class="p">:</span> <span class="n">AI</span><span class="p">,</span> <span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Message</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the AI on the main prompt and save the results&quot;&quot;&quot;</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">setup_sys_prompt</span><span class="p">(</span><span class="n">dbs</span><span class="p">),</span> <span class="n">get_prompt</span><span class="p">(</span><span class="n">dbs</span><span class="p">),</span> <span class="n">step_name</span><span class="o">=</span><span class="n">curr_fn</span><span class="p">())</span>
+    <span class="n">to_files</span><span class="p">(</span><span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">dbs</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">messages</span></div>
+
+
+<div class="viewcode-block" id="clarify"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.clarify.html#gpt_engineer.steps.clarify">[docs]</a><span class="k">def</span> <span class="nf">clarify</span><span class="p">(</span><span class="n">ai</span><span class="p">:</span> <span class="n">AI</span><span class="p">,</span> <span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Message</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ask the user if they want to clarify anything and save the results to the workspace</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Message</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ai</span><span class="o">.</span><span class="n">fsystem</span><span class="p">(</span><span class="n">dbs</span><span class="o">.</span><span class="n">preprompts</span><span class="p">[</span><span class="s2">&quot;clarify&quot;</span><span class="p">])]</span>
+    <span class="n">user_input</span> <span class="o">=</span> <span class="n">get_prompt</span><span class="p">(</span><span class="n">dbs</span><span class="p">)</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">messages</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">user_input</span><span class="p">,</span> <span class="n">step_name</span><span class="o">=</span><span class="n">curr_fn</span><span class="p">())</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;Nothing more to clarify.&quot;</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;no&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nothing more to clarify.&quot;</span><span class="p">)</span>
+            <span class="k">break</span>
+
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="n">user_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;(answer in text, or &quot;c&quot; to move on)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">user_input</span> <span class="ow">or</span> <span class="n">user_input</span> <span class="o">==</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;(letting gpt-engineer make its own assumptions)&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="n">messages</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">next</span><span class="p">(</span>
+                <span class="n">messages</span><span class="p">,</span>
+                <span class="s2">&quot;Make your own assumptions and state them explicitly before starting&quot;</span><span class="p">,</span>
+                <span class="n">step_name</span><span class="o">=</span><span class="n">curr_fn</span><span class="p">(),</span>
+            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">messages</span>
+
+        <span class="n">user_input</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;Is anything else unclear? If yes, only answer in the form:</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;{remaining unclear areas} remaining questions.</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;{Next question}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s1">&#39;If everything is sufficiently clear, only answer &quot;Nothing more to clarify.&quot;.&#39;</span>
+        <span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">messages</span></div>
+
+
+<div class="viewcode-block" id="gen_spec"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.gen_spec.html#gpt_engineer.steps.gen_spec">[docs]</a><span class="k">def</span> <span class="nf">gen_spec</span><span class="p">(</span><span class="n">ai</span><span class="p">:</span> <span class="n">AI</span><span class="p">,</span> <span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Message</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a spec from the main prompt + clarifications and save the results to</span>
+<span class="sd">    the workspace</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fsystem</span><span class="p">(</span><span class="n">setup_sys_prompt</span><span class="p">(</span><span class="n">dbs</span><span class="p">)),</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fsystem</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Instructions: </span><span class="si">{</span><span class="n">dbs</span><span class="o">.</span><span class="n">input</span><span class="p">[</span><span class="s1">&#39;prompt&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">dbs</span><span class="o">.</span><span class="n">preprompts</span><span class="p">[</span><span class="s2">&quot;spec&quot;</span><span class="p">],</span> <span class="n">step_name</span><span class="o">=</span><span class="n">curr_fn</span><span class="p">())</span>
+
+    <span class="n">dbs</span><span class="o">.</span><span class="n">memory</span><span class="p">[</span><span class="s2">&quot;specification&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">messages</span></div>
+
+
+<div class="viewcode-block" id="respec"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.respec.html#gpt_engineer.steps.respec">[docs]</a><span class="k">def</span> <span class="nf">respec</span><span class="p">(</span><span class="n">ai</span><span class="p">:</span> <span class="n">AI</span><span class="p">,</span> <span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Message</span><span class="p">]:</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">AI</span><span class="o">.</span><span class="n">deserialize_messages</span><span class="p">(</span><span class="n">dbs</span><span class="o">.</span><span class="n">logs</span><span class="p">[</span><span class="n">gen_spec</span><span class="o">.</span><span class="vm">__name__</span><span class="p">])</span>
+    <span class="n">messages</span> <span class="o">+=</span> <span class="p">[</span><span class="n">ai</span><span class="o">.</span><span class="n">fsystem</span><span class="p">(</span><span class="n">dbs</span><span class="o">.</span><span class="n">preprompts</span><span class="p">[</span><span class="s2">&quot;respec&quot;</span><span class="p">])]</span>
+
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">step_name</span><span class="o">=</span><span class="n">curr_fn</span><span class="p">())</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">next</span><span class="p">(</span>
+        <span class="n">messages</span><span class="p">,</span>
+        <span class="p">(</span>
+            <span class="s2">&quot;Based on the conversation so far, please reiterate the specification for &quot;</span>
+            <span class="s2">&quot;the program. &quot;</span>
+            <span class="s2">&quot;If there are things that can be improved, please incorporate the &quot;</span>
+            <span class="s2">&quot;improvements. &quot;</span>
+            <span class="s2">&quot;If you are satisfied with the specification, just write out the &quot;</span>
+            <span class="s2">&quot;specification word by word again.&quot;</span>
+        <span class="p">),</span>
+        <span class="n">step_name</span><span class="o">=</span><span class="n">curr_fn</span><span class="p">(),</span>
+    <span class="p">)</span>
+
+    <span class="n">dbs</span><span class="o">.</span><span class="n">memory</span><span class="p">[</span><span class="s2">&quot;specification&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">messages</span></div>
+
+
+<div class="viewcode-block" id="gen_unit_tests"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.gen_unit_tests.html#gpt_engineer.steps.gen_unit_tests">[docs]</a><span class="k">def</span> <span class="nf">gen_unit_tests</span><span class="p">(</span><span class="n">ai</span><span class="p">:</span> <span class="n">AI</span><span class="p">,</span> <span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate unit tests based on the specification, that should work.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fsystem</span><span class="p">(</span><span class="n">setup_sys_prompt</span><span class="p">(</span><span class="n">dbs</span><span class="p">)),</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fuser</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Instructions: </span><span class="si">{</span><span class="n">dbs</span><span class="o">.</span><span class="n">input</span><span class="p">[</span><span class="s1">&#39;prompt&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fuser</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Specification:</span><span class="se">\n\n</span><span class="si">{</span><span class="n">dbs</span><span class="o">.</span><span class="n">memory</span><span class="p">[</span><span class="s1">&#39;specification&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">dbs</span><span class="o">.</span><span class="n">preprompts</span><span class="p">[</span><span class="s2">&quot;unit_tests&quot;</span><span class="p">],</span> <span class="n">step_name</span><span class="o">=</span><span class="n">curr_fn</span><span class="p">())</span>
+
+    <span class="n">dbs</span><span class="o">.</span><span class="n">memory</span><span class="p">[</span><span class="s2">&quot;unit_tests&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">to_files</span><span class="p">(</span><span class="n">dbs</span><span class="o">.</span><span class="n">memory</span><span class="p">[</span><span class="s2">&quot;unit_tests&quot;</span><span class="p">],</span> <span class="n">dbs</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">messages</span></div>
+
+
+<div class="viewcode-block" id="gen_clarified_code"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.gen_clarified_code.html#gpt_engineer.steps.gen_clarified_code">[docs]</a><span class="k">def</span> <span class="nf">gen_clarified_code</span><span class="p">(</span><span class="n">ai</span><span class="p">:</span> <span class="n">AI</span><span class="p">,</span> <span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Takes clarification and generates code&quot;&quot;&quot;</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">AI</span><span class="o">.</span><span class="n">deserialize_messages</span><span class="p">(</span><span class="n">dbs</span><span class="o">.</span><span class="n">logs</span><span class="p">[</span><span class="n">clarify</span><span class="o">.</span><span class="vm">__name__</span><span class="p">])</span>
+
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fsystem</span><span class="p">(</span><span class="n">setup_sys_prompt</span><span class="p">(</span><span class="n">dbs</span><span class="p">)),</span>
+    <span class="p">]</span> <span class="o">+</span> <span class="n">messages</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">dbs</span><span class="o">.</span><span class="n">preprompts</span><span class="p">[</span><span class="s2">&quot;use_qa&quot;</span><span class="p">],</span> <span class="n">step_name</span><span class="o">=</span><span class="n">curr_fn</span><span class="p">())</span>
+
+    <span class="n">to_files</span><span class="p">(</span><span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">dbs</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">messages</span></div>
+
+
+<div class="viewcode-block" id="gen_code"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.gen_code.html#gpt_engineer.steps.gen_code">[docs]</a><span class="k">def</span> <span class="nf">gen_code</span><span class="p">(</span><span class="n">ai</span><span class="p">:</span> <span class="n">AI</span><span class="p">,</span> <span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+    <span class="c1"># get the messages from previous step</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fsystem</span><span class="p">(</span><span class="n">setup_sys_prompt</span><span class="p">(</span><span class="n">dbs</span><span class="p">)),</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fuser</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Instructions: </span><span class="si">{</span><span class="n">dbs</span><span class="o">.</span><span class="n">input</span><span class="p">[</span><span class="s1">&#39;prompt&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fuser</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Specification:</span><span class="se">\n\n</span><span class="si">{</span><span class="n">dbs</span><span class="o">.</span><span class="n">memory</span><span class="p">[</span><span class="s1">&#39;specification&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fuser</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unit tests:</span><span class="se">\n\n</span><span class="si">{</span><span class="n">dbs</span><span class="o">.</span><span class="n">memory</span><span class="p">[</span><span class="s1">&#39;unit_tests&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">dbs</span><span class="o">.</span><span class="n">preprompts</span><span class="p">[</span><span class="s2">&quot;use_qa&quot;</span><span class="p">],</span> <span class="n">step_name</span><span class="o">=</span><span class="n">curr_fn</span><span class="p">())</span>
+    <span class="n">to_files</span><span class="p">(</span><span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">dbs</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">messages</span></div>
+
+
+<div class="viewcode-block" id="execute_entrypoint"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.execute_entrypoint.html#gpt_engineer.steps.execute_entrypoint">[docs]</a><span class="k">def</span> <span class="nf">execute_entrypoint</span><span class="p">(</span><span class="n">ai</span><span class="p">:</span> <span class="n">AI</span><span class="p">,</span> <span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">dbs</span><span class="o">.</span><span class="n">workspace</span><span class="p">[</span><span class="s2">&quot;run.sh&quot;</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Do you want to execute this code?&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;If yes, press enter. Otherwise, type &quot;no&quot;&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">input</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;yes&quot;</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ok, not executing the code.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Executing the code...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="n">colored</span><span class="p">(</span>
+            <span class="s2">&quot;Note: If it does not work as expected, consider running the code&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot; in another way than above.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;green&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You can press ctrl+c *once* to stop the execution.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="s2">&quot;bash run.sh&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">dbs</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stopping execution.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Execution stopped.&quot;</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="p">[]</span></div>
+
+
+<div class="viewcode-block" id="gen_entrypoint"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.gen_entrypoint.html#gpt_engineer.steps.gen_entrypoint">[docs]</a><span class="k">def</span> <span class="nf">gen_entrypoint</span><span class="p">(</span><span class="n">ai</span><span class="p">:</span> <span class="n">AI</span><span class="p">,</span> <span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">start</span><span class="p">(</span>
+        <span class="n">system</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;You will get information about a codebase that is currently on disk in &quot;</span>
+            <span class="s2">&quot;the current folder.</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;From this you will answer with code blocks that includes all the necessary &quot;</span>
+            <span class="s2">&quot;unix terminal commands to &quot;</span>
+            <span class="s2">&quot;a) install dependencies &quot;</span>
+            <span class="s2">&quot;b) run all necessary parts of the codebase (in parallel if necessary).</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;Do not install globally. Do not use sudo.</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;Do not explain the code, just give the commands.</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;Do not use placeholders, use example values (like . for a folder argument) &quot;</span>
+            <span class="s2">&quot;if necessary.</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">),</span>
+        <span class="n">user</span><span class="o">=</span><span class="s2">&quot;Information about the codebase:</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">dbs</span><span class="o">.</span><span class="n">workspace</span><span class="p">[</span><span class="s2">&quot;all_output.txt&quot;</span><span class="p">],</span>
+        <span class="n">step_name</span><span class="o">=</span><span class="n">curr_fn</span><span class="p">(),</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+
+    <span class="n">regex</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;```\S*\n(.+?)```&quot;</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+    <span class="n">dbs</span><span class="o">.</span><span class="n">workspace</span><span class="p">[</span><span class="s2">&quot;run.sh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">messages</span></div>
+
+
+<div class="viewcode-block" id="use_feedback"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.use_feedback.html#gpt_engineer.steps.use_feedback">[docs]</a><span class="k">def</span> <span class="nf">use_feedback</span><span class="p">(</span><span class="n">ai</span><span class="p">:</span> <span class="n">AI</span><span class="p">,</span> <span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">):</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fsystem</span><span class="p">(</span><span class="n">setup_sys_prompt</span><span class="p">(</span><span class="n">dbs</span><span class="p">)),</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fuser</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Instructions: </span><span class="si">{</span><span class="n">dbs</span><span class="o">.</span><span class="n">input</span><span class="p">[</span><span class="s1">&#39;prompt&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fassistant</span><span class="p">(</span><span class="n">dbs</span><span class="o">.</span><span class="n">workspace</span><span class="p">[</span><span class="s2">&quot;all_output.txt&quot;</span><span class="p">]),</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fsystem</span><span class="p">(</span><span class="n">dbs</span><span class="o">.</span><span class="n">preprompts</span><span class="p">[</span><span class="s2">&quot;use_feedback&quot;</span><span class="p">]),</span>
+    <span class="p">]</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">dbs</span><span class="o">.</span><span class="n">input</span><span class="p">[</span><span class="s2">&quot;feedback&quot;</span><span class="p">],</span> <span class="n">step_name</span><span class="o">=</span><span class="n">curr_fn</span><span class="p">())</span>
+    <span class="n">to_files</span><span class="p">(</span><span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">dbs</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">messages</span></div>
+
+
+<div class="viewcode-block" id="fix_code"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.fix_code.html#gpt_engineer.steps.fix_code">[docs]</a><span class="k">def</span> <span class="nf">fix_code</span><span class="p">(</span><span class="n">ai</span><span class="p">:</span> <span class="n">AI</span><span class="p">,</span> <span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">):</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">AI</span><span class="o">.</span><span class="n">deserialize_messages</span><span class="p">(</span><span class="n">dbs</span><span class="o">.</span><span class="n">logs</span><span class="p">[</span><span class="n">gen_code</span><span class="o">.</span><span class="vm">__name__</span><span class="p">])</span>
+    <span class="n">code_output</span> <span class="o">=</span> <span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fsystem</span><span class="p">(</span><span class="n">setup_sys_prompt</span><span class="p">(</span><span class="n">dbs</span><span class="p">)),</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fuser</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Instructions: </span><span class="si">{</span><span class="n">dbs</span><span class="o">.</span><span class="n">input</span><span class="p">[</span><span class="s1">&#39;prompt&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fuser</span><span class="p">(</span><span class="n">code_output</span><span class="p">),</span>
+        <span class="n">ai</span><span class="o">.</span><span class="n">fsystem</span><span class="p">(</span><span class="n">dbs</span><span class="o">.</span><span class="n">preprompts</span><span class="p">[</span><span class="s2">&quot;fix_code&quot;</span><span class="p">]),</span>
+    <span class="p">]</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">ai</span><span class="o">.</span><span class="n">next</span><span class="p">(</span>
+        <span class="n">messages</span><span class="p">,</span> <span class="s2">&quot;Please fix any errors in the code above.&quot;</span><span class="p">,</span> <span class="n">step_name</span><span class="o">=</span><span class="n">curr_fn</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="n">to_files</span><span class="p">(</span><span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">dbs</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">messages</span></div>
+
+
+<div class="viewcode-block" id="human_review"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.human_review.html#gpt_engineer.steps.human_review">[docs]</a><span class="k">def</span> <span class="nf">human_review</span><span class="p">(</span><span class="n">ai</span><span class="p">:</span> <span class="n">AI</span><span class="p">,</span> <span class="n">dbs</span><span class="p">:</span> <span class="n">DBs</span><span class="p">):</span>
+    <span class="n">review</span> <span class="o">=</span> <span class="n">human_input</span><span class="p">()</span>
+    <span class="n">dbs</span><span class="o">.</span><span class="n">memory</span><span class="p">[</span><span class="s2">&quot;review&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">review</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+    <span class="k">return</span> <span class="p">[]</span></div>
+
+
+<div class="viewcode-block" id="Config"><a class="viewcode-back" href="../../steps/gpt_engineer.steps.Config.html#gpt_engineer.steps.Config">[docs]</a><span class="k">class</span> <span class="nc">Config</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+    <span class="n">DEFAULT</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span>
+    <span class="n">BENCHMARK</span> <span class="o">=</span> <span class="s2">&quot;benchmark&quot;</span>
+    <span class="n">SIMPLE</span> <span class="o">=</span> <span class="s2">&quot;simple&quot;</span>
+    <span class="n">TDD</span> <span class="o">=</span> <span class="s2">&quot;tdd&quot;</span>
+    <span class="n">TDD_PLUS</span> <span class="o">=</span> <span class="s2">&quot;tdd+&quot;</span>
+    <span class="n">CLARIFY</span> <span class="o">=</span> <span class="s2">&quot;clarify&quot;</span>
+    <span class="n">RESPEC</span> <span class="o">=</span> <span class="s2">&quot;respec&quot;</span>
+    <span class="n">EXECUTE_ONLY</span> <span class="o">=</span> <span class="s2">&quot;execute_only&quot;</span>
+    <span class="n">EVALUATE</span> <span class="o">=</span> <span class="s2">&quot;evaluate&quot;</span>
+    <span class="n">USE_FEEDBACK</span> <span class="o">=</span> <span class="s2">&quot;use_feedback&quot;</span></div>
+
+
+<span class="c1"># Different configs of what steps to run</span>
+<span class="n">STEPS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">DEFAULT</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">clarify</span><span class="p">,</span>
+        <span class="n">gen_clarified_code</span><span class="p">,</span>
+        <span class="n">gen_entrypoint</span><span class="p">,</span>
+        <span class="n">execute_entrypoint</span><span class="p">,</span>
+        <span class="n">human_review</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">BENCHMARK</span><span class="p">:</span> <span class="p">[</span><span class="n">simple_gen</span><span class="p">,</span> <span class="n">gen_entrypoint</span><span class="p">],</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">SIMPLE</span><span class="p">:</span> <span class="p">[</span><span class="n">simple_gen</span><span class="p">,</span> <span class="n">gen_entrypoint</span><span class="p">,</span> <span class="n">execute_entrypoint</span><span class="p">],</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">TDD</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">gen_spec</span><span class="p">,</span>
+        <span class="n">gen_unit_tests</span><span class="p">,</span>
+        <span class="n">gen_code</span><span class="p">,</span>
+        <span class="n">gen_entrypoint</span><span class="p">,</span>
+        <span class="n">execute_entrypoint</span><span class="p">,</span>
+        <span class="n">human_review</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">TDD_PLUS</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">gen_spec</span><span class="p">,</span>
+        <span class="n">gen_unit_tests</span><span class="p">,</span>
+        <span class="n">gen_code</span><span class="p">,</span>
+        <span class="n">fix_code</span><span class="p">,</span>
+        <span class="n">gen_entrypoint</span><span class="p">,</span>
+        <span class="n">execute_entrypoint</span><span class="p">,</span>
+        <span class="n">human_review</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">CLARIFY</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">clarify</span><span class="p">,</span>
+        <span class="n">gen_clarified_code</span><span class="p">,</span>
+        <span class="n">gen_entrypoint</span><span class="p">,</span>
+        <span class="n">execute_entrypoint</span><span class="p">,</span>
+        <span class="n">human_review</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">RESPEC</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">gen_spec</span><span class="p">,</span>
+        <span class="n">respec</span><span class="p">,</span>
+        <span class="n">gen_unit_tests</span><span class="p">,</span>
+        <span class="n">gen_code</span><span class="p">,</span>
+        <span class="n">fix_code</span><span class="p">,</span>
+        <span class="n">gen_entrypoint</span><span class="p">,</span>
+        <span class="n">execute_entrypoint</span><span class="p">,</span>
+        <span class="n">human_review</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">USE_FEEDBACK</span><span class="p">:</span> <span class="p">[</span><span class="n">use_feedback</span><span class="p">,</span> <span class="n">gen_entrypoint</span><span class="p">,</span> <span class="n">execute_entrypoint</span><span class="p">,</span> <span class="n">human_review</span><span class="p">],</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">EXECUTE_ONLY</span><span class="p">:</span> <span class="p">[</span><span class="n">execute_entrypoint</span><span class="p">],</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">EVALUATE</span><span class="p">:</span> <span class="p">[</span><span class="n">execute_entrypoint</span><span class="p">,</span> <span class="n">human_review</span><span class="p">],</span>
+<span class="p">}</span>
+
+<span class="c1"># Future steps that can be added:</span>
+<span class="c1"># run_tests_and_fix_files</span>
+<span class="c1"># execute_entrypoint_and_fix_files_if_it_results_in_error</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023 Anton Osika.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

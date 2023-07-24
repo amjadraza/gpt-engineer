@@ -1,5 +1,6 @@
 
 # Contributing to GPT Engineer
+
 By participating in this project, you agree to abide by the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Getting Started
